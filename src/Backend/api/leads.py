@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import and_
 from typing import List
 from typing import Dict
+from sqlalchemy.exc import IntegrityError
 
 
 from database import get_db
@@ -252,11 +253,40 @@ def delete_lead(
         )
     
     try:
+        calls = db.query(ClientCall).filter(
+            and_(
+                ClientCall.lead_id == lead_id,
+                ClientCall.company_domain == current_user.company_domain
+            )
+        ).all()
+        
+        for call in calls:
+            db.delete(call)
+        
+        meetings = db.query(ClientMeeting).filter(
+            and_(
+                ClientMeeting.lead_id == lead_id,
+                ClientMeeting.company_domain == current_user.company_domain
+            )
+        ).all()
+        
+        for meeting in meetings:
+            db.delete(meeting)
+        
         db.delete(lead)
         db.commit()
-        return SuccessResponse(message="Lead deleted successfully")
+        
+        calls_count = len(calls)
+        meetings_count = len(meetings)
+        message = "Lead deleted successfully"
+        if calls_count > 0 or meetings_count > 0:
+            message += f" (removed {calls_count} calls and {meetings_count} meetings)"
+            
+        return SuccessResponse(message=message)
+        
     except Exception as e:
         db.rollback()
+        print(f"Unexpected error deleting lead {lead_id}: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to delete lead"

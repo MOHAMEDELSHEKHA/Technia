@@ -230,35 +230,45 @@ const RealEstateLeads = ({ user, onLogout }) => {
     await fetchLeadActions(lead.lead_id);
   };
 
-  const handleDeleteLead = async () => {
-    if (!leadToDelete) return;
+const handleDeleteLead = async () => {
+  if (!leadToDelete) return;
 
-    try {
-      const token = localStorage.getItem('auth_token');
-      const response = await fetch(
-        `http://localhost:8000/api/real-estate/leads/${leadToDelete.lead_id}`, 
-        {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Basic ${token}`,
-          },
-        }
-      );
-
-      if (response.ok) {
-        setLeads(leads.filter(lead => lead.lead_id !== leadToDelete.lead_id));
-        setShowDeleteModal(false);
-        setLeadToDelete(null);
-      } else if (response.status === 403) {
-        alert('You do not have permission to delete leads');
-      } else {
-        alert('Failed to delete lead');
+  try {
+    const token = localStorage.getItem('auth_token');
+    const response = await fetch(
+      `http://localhost:8000/api/real-estate/leads/${leadToDelete.lead_id}`, 
+      {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Basic ${token}`,
+        },
       }
-    } catch (error) {
-      console.error('Failed to delete lead:', error);
-      alert('Failed to delete lead');
+    );
+
+    if (response.ok) {
+      const result = await response.json();
+      setLeads(leads.filter(lead => lead.lead_id !== leadToDelete.lead_id));
+      setShowDeleteModal(false);
+      setLeadToDelete(null);
+      
+      
+    } else if (response.status === 403) {
+      alert('You do not have permission to delete leads');
+    } else if (response.status === 404) {
+      alert('Lead not found - it may have already been deleted');
+      fetchData();
+    } else if (response.status === 400) {
+      const errorData = await response.json().catch(() => ({}));
+      alert(errorData.detail || 'Cannot delete lead due to database constraints');
+    } else {
+      const errorData = await response.json().catch(() => ({}));
+      alert(errorData.detail || 'Failed to delete lead');
     }
-  };
+  } catch (error) {
+    console.error('Failed to delete lead:', error);
+    alert('Network error - please check your connection and try again');
+  }
+};
 
   const handleDeleteClick = (lead) => {
     if (!permissions.canDelete) {

@@ -93,6 +93,8 @@ const RealEstateActions = ({ user, onLogout }) => {
                   status_name: call.call_status_name,
                   lead_name: lead.name || lead.lead_phone,
                   lead_id: lead.lead_id,
+                  lead_assigned_to: lead.assigned_to, 
+                  action_assigned_to: call.assigned_to, 
                   id: call.call_id
                 });
               });
@@ -109,6 +111,8 @@ const RealEstateActions = ({ user, onLogout }) => {
                   status_name: meeting.meeting_status_name,
                   lead_name: lead.name || lead.lead_phone,
                   lead_id: lead.lead_id,
+                  lead_assigned_to: lead.assigned_to, 
+                  action_assigned_to: meeting.assigned_to, 
                   id: meeting.meeting_id
                 });
               });
@@ -195,6 +199,7 @@ const RealEstateActions = ({ user, onLogout }) => {
         setActionToDelete(null);
         
       } else if (response.status === 403) {
+        alert('You do not have permission to delete actions');
       } else if (response.status === 404) {
         setActions(actions.filter(action => 
           !(action.type === actionToDelete.type && action.id === actionToDelete.id)
@@ -320,8 +325,13 @@ const RealEstateActions = ({ user, onLogout }) => {
               </div>
               
               <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                <span className="text-sm font-medium text-gray-600">Assigned To</span>
-                <span className="text-sm text-gray-900">{getUserName(selectedAction.assigned_to)}</span>
+                <span className="text-sm font-medium text-gray-600">Lead Assigned To</span>
+                <span className="text-sm text-gray-900">{getUserName(selectedAction.lead_assigned_to)}</span>
+              </div>
+              
+              <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                <span className="text-sm font-medium text-gray-600">Action Created By</span>
+                <span className="text-sm text-gray-500">{getUserName(selectedAction.action_assigned_to)}</span>
               </div>
               
               <div className="flex justify-between items-center py-2 border-b border-gray-100">
@@ -441,7 +451,7 @@ const RealEstateActions = ({ user, onLogout }) => {
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">S/N</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lead</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned User</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lead Assigned To</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                         {permissions.canDelete && (
@@ -481,7 +491,7 @@ const RealEstateActions = ({ user, onLogout }) => {
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="text-sm text-gray-900">
-                                {getUserName(action.assigned_to)}
+                                {getUserName(action.lead_assigned_to)}
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
