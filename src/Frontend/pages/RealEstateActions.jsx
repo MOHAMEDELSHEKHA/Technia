@@ -425,7 +425,7 @@ const RealEstateActions = ({ user, onLogout }) => {
           <div className="max-w-7xl mx-auto">
             <div className="bg-white rounded-lg shadow-sm overflow-hidden w-[385px] sm:w-auto">
               <div className="px-6 py-4 flex items-center justify-between">
-                <h2 className="text-lg font-medium text-gray-900">All Actions</h2>
+                <h2 className="text-lg font-medium text-gray-900">All Meetings/Calls</h2>
                 {permissions.canWrite && (
                   <button
                     onClick={handleAddAction}
